@@ -5,6 +5,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+/**
+ * 流布局
+ */
 public class TestFlowLayout {
 
 
@@ -18,7 +21,7 @@ public class TestFlowLayout {
         Button button3 = new Button("Button3");
 
         frame.setLayout( new FlowLayout(FlowLayout.RIGHT));
-        frame.setLayout( new FlowLayout(FlowLayout.LEFT));
+//        frame.setLayout( new FlowLayout(FlowLayout.LEFT));
 
         frame.setSize(200,200);
 
