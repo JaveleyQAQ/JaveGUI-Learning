@@ -23,9 +23,9 @@ class MyFrame extends Frame {
 
     public  MyFrame(String title){
         super(title);
-        setBounds(200,200,400,400);
-        setVisible(true);
         addMouseListener(new MyMouseListener());
+        setVisible(true);
+        setBounds(200,200,400,400);
         repaint();
     }
 
