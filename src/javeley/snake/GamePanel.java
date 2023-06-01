@@ -11,18 +11,20 @@ import java.util.Random;
 /**
  * 游戏面板绘制
  */
-public class GamePanel extends JPanel  implements KeyListener , ActionListener {
+public class GamePanel extends JPanel implements KeyListener, ActionListener {
 
     int length; //蛇的长度
     int[] snakeX = new int[600]; //蛇的X坐标
     int[] snakeY = new int[500];//蛇的Y坐标
-    String fx="R";   //判断方向
+    String fx;   //判断方向
     boolean isStart = false; //游戏状态
+    boolean isDefeat = false; //是否失败
 
-    Timer timer = new Timer(100,this);
+    Timer timer = new Timer(180, this);
     //随机食物坐标
-    int foodX,foodY;
+    int foodX, foodY;
     Random rand = new Random();
+    int score;
 
     public GamePanel() {
         init();
@@ -40,6 +42,7 @@ public class GamePanel extends JPanel  implements KeyListener , ActionListener {
      */
     public void init() {
         length = 3;
+        score = 0;
         snakeX[0] = 100;
         snakeY[0] = 100;    //蛇头的位置
         snakeX[1] = 75;
@@ -48,8 +51,11 @@ public class GamePanel extends JPanel  implements KeyListener , ActionListener {
         snakeY[2] = 100;    //第二个身体位置
 
         //食物随机分布
-        foodX= 25+25*rand.nextInt(34); //850/25
-        foodY= 75+25*rand.nextInt(26);  //650/25
+        foodX = 25 + 25 * rand.nextInt(34); //850/25
+        foodY = 75 + 25 * rand.nextInt(26);  //650/25
+        fx = "R";
+
+
     }
 
     @Override
@@ -61,56 +67,74 @@ public class GamePanel extends JPanel  implements KeyListener , ActionListener {
         //绘制矩形框
         g.fillRect(25, 75, 850, 600);
 
+        //绘制积分
+        g.setColor(Color.green);
+        g.setFont(new Font("黑体-简", Font.BOLD, 15));
+        g.drawString("长度：" + length, 750, 35);
+        g.drawString("分数：" + score, 750, 55);
+
+
+        //绘画食物
+        SnakePictureData.FOOD.paintIcon(this, g, foodX, foodY);
+
         //绘制小蛇🐍
         if (fx.equals("R")) {
             SnakePictureData.RIGHT.paintIcon(this, g, snakeX[0], snakeY[0]);//绘制头
 
 
-        }else if (fx.equals("L")){
+        } else if (fx.equals("L")) {
             SnakePictureData.LEFT.paintIcon(this, g, snakeX[0], snakeY[0]);
 
-        }else if (fx.equals("U")){
+        } else if (fx.equals("U")) {
             SnakePictureData.UP.paintIcon(this, g, snakeX[0], snakeY[0]);
 
-        }else if (fx.equals("D")){
+        } else if (fx.equals("D")) {
             SnakePictureData.DOWN.paintIcon(this, g, snakeX[0], snakeY[0]);
         }
 
 //         SnakePictureData.BODY.paintIcon(this,g,snakeX[1],snakeY[1]); //绘制身体
 //         SnakePictureData.BODY.paintIcon(this,g,snakeX[2],snakeY[2]);
         for (int i = 1; i < length; i++) {
-            SnakePictureData.BODY.paintIcon(this,g,snakeX[i],snakeY[i]);
+            SnakePictureData.BODY.paintIcon(this, g, snakeX[i], snakeY[i]);
         }
 
-        SnakePictureData.FOOD.paintIcon(this,g,foodX,foodY);
 
         //游戏状态
-        if (!isStart){
+        if (!isStart) {
             g.setColor(Color.WHITE);
-            g.setFont(new Font("黑体-简",Font.BOLD,40));
-            g.drawString("按下空格开始游戏",300,300);
+            g.setFont(new Font("黑体-简", Font.BOLD, 40));
+            g.drawString("按下空格开始游戏", 300, 300);
+        } else if (isDefeat) {
+            g.setColor(Color.RED);
+            g.setFont(new Font("黑体-简", Font.BOLD, 40));
+            g.drawString("游戏结束", 300, 300);
+
         }
 
 
     }
 
 
-
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE){
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (isDefeat) {
+                isDefeat = false;
+                init();
+            }
             isStart = !isStart;  //取相反，这里不能写死为true，不然后面再次按下，就一直都是true了
             repaint(); //重画 刷新一下界面
         }
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-            fx ="R";
-        }else if (e.getKeyCode() == KeyEvent.VK_LEFT){
-            fx ="L";
-        }else if (e.getKeyCode() == KeyEvent.VK_UP){
-            fx ="U";
-        }else if (e.getKeyCode() == KeyEvent.VK_DOWN){
-            fx ="D";
-        };
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            fx = "R";
+        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            fx = "L";
+        } else if (e.getKeyCode() == KeyEvent.VK_UP) {
+            fx = "U";
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            fx = "D";
+        }
+        ;
 
     }
 
@@ -118,58 +142,69 @@ public class GamePanel extends JPanel  implements KeyListener , ActionListener {
     public void actionPerformed(ActionEvent e) {
 
 
-            if (isStart){
+        if (isStart && !isDefeat) {
 
-                //判断食物是否重合被吃
-                if(snakeX[0] == foodX && snakeY[0]==foodY){
-                    length++;
-                    foodX= 25+25*rand.nextInt(34); //850/25
-                    foodY= 75+25*rand.nextInt(26);  //650/25
-
-                }
-
-
-                //蛇身体移动
-                for (int i = length; i > 0; i--) {
-                    snakeX[i] = snakeX[i-1];
-                    snakeY[i] = snakeY[i-1];
-                }
+            //判断食物是否重合被吃
+            if (snakeX[0] == foodX && snakeY[0] == foodY) {
+                length++;
+                score = score + 10;
+                foodX = 25 + 25 * rand.nextInt(34); //850/25
+                foodY = 75 + 25 * rand.nextInt(23);  //650/25
 
 
-                //判断边界
-                if (snakeX[0] > 850){
-                    snakeX[0] = 25 ;
-                }
-                if (fx.equals("R")){
-                    snakeX[0]  = snakeX[0]+25; //蛇头X移动+25
-                    if (snakeX[0] > 850)
-                        snakeX[0] = 25;
-
-                }else if (fx.equals("L")){
-                    snakeX[0]  = snakeX[0]-25; //蛇头X移动+25
-                    if (snakeX[0] < 25)
-                        snakeX[0] = 850;
-
-                }else if (fx.equals("U")){
-                    snakeY[0] = snakeY[0]-25;
-                    if (snakeY[0]<75)
-                        snakeY[0]=650;
-
-                }else if (fx.equals("D")){
-                    snakeY[0] = snakeY[0]+25;
-                    if (snakeY[0]>650)
-                        snakeY[0]=75;
-                }
-
-                repaint();//每次修改重新绘画
-                timer.start();
             }
+
+
+            //蛇身体移动
+            for (int i = length; i > 0; i--) {
+                snakeX[i] = snakeX[i - 1];
+                snakeY[i] = snakeY[i - 1];
+
+            }
+
+
+            //判断边界
+            if (snakeX[0] > 850) {
+                snakeX[0] = 25;
+            }
+            if (fx.equals("R")) {
+                snakeX[0] = snakeX[0] + 25; //蛇头X移动+25
+                if (snakeX[0] > 850)
+                    snakeX[0] = 25;
+
+            } else if (fx.equals("L")) {
+                snakeX[0] = snakeX[0] - 25; //蛇头X移动+25
+                if (snakeX[0] < 25)
+                    snakeX[0] = 850;
+
+            } else if (fx.equals("U")) {
+                snakeY[0] = snakeY[0] - 25;
+                if (snakeY[0] < 75)
+                    snakeY[0] = 650;
+
+            } else if (fx.equals("D")) {
+                snakeY[0] = snakeY[0] + 25;
+                if (snakeY[0] > 650)
+                    snakeY[0] = 75;
+            }
+
+            for (int i = 1; i < length; i++) {
+                if (snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i])
+                    isDefeat = true;
+
+            }
+
+
+            repaint();//每次修改重新绘画
+            timer.start();
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
 
     }
+
     @Override
     public void keyTyped(KeyEvent e) {
     }
